@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Employee, EmployeeStatus } from '../services/Employee/typing'; 
+import { Employee, EmployeeStatus } from '../services/Employee/typing';
 
 const useEmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+
+  const [search, setSearch] = useState<string>('');
+  const [filterPosition, setFilterPosition] = useState<string | undefined>(undefined);
+  const [filterDepartment, setFilterDepartment] = useState<string | undefined>(undefined);
+
+  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const storedEmployees = localStorage.getItem('employees');
@@ -57,7 +64,7 @@ const useEmployeeManagement = () => {
       updatedEmployees = [...employees, newEmployee];
     }
     setEmployees(updatedEmployees);
-    saveToLocalStorage(updatedEmployees); 
+    saveToLocalStorage(updatedEmployees);
   };
 
   const deleteEmployee = (id: string) => {
@@ -67,14 +74,48 @@ const useEmployeeManagement = () => {
     if (employeeToDelete.status === EmployeeStatus.Trial || employeeToDelete.status === EmployeeStatus.Resigned) {
       const updatedEmployees = employees.filter((e) => e.id !== id);
       setEmployees(updatedEmployees);
-      saveToLocalStorage(updatedEmployees); 
+      saveToLocalStorage(updatedEmployees);
     } else {
       alert('Bạn chỉ được phép xóa nhân viên đang thử việc hoặc đã thôi việc!');
     }
   };
 
+  const handleDeleteEmployee = (id: string) => {
+    setEmployeeToDelete(id);
+    setConfirmDeleteVisible(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (employeeToDelete) {
+      deleteEmployee(employeeToDelete);
+    }
+    setConfirmDeleteVisible(false);
+    setEmployeeToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteVisible(false);
+    setEmployeeToDelete(null);
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setFilterPosition(undefined);
+    setFilterDepartment(undefined);
+  };
+
+  const filteredEmployees = employees.filter((employee) => {
+    const matchesSearch =
+      employee.id.toLowerCase().includes(search.toLowerCase()) ||
+      employee.name.toLowerCase().includes(search.toLowerCase());
+    const matchesPosition = filterPosition ? employee.position === filterPosition : true;
+    const matchesDepartment = filterDepartment ? employee.department === filterDepartment : true;
+    return matchesSearch && matchesPosition && matchesDepartment;
+  });
+
   return {
     employees,
+    filteredEmployees,
     visible,
     setVisible,
     isEdit,
@@ -83,6 +124,19 @@ const useEmployeeManagement = () => {
     setSelectedEmployee,
     saveEmployee,
     deleteEmployee,
+    handleDeleteEmployee,
+    handleConfirmDelete,
+    handleCancelDelete,
+    confirmDeleteVisible,
+    employeeToDelete,
+
+    search,
+    setSearch,
+    filterPosition,
+    setFilterPosition,
+    filterDepartment,
+    setFilterDepartment,
+    clearFilters,
   };
 };
 

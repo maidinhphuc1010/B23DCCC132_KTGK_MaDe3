@@ -1,5 +1,4 @@
 import { Table, Button, Modal, Input, Select, Space } from 'antd';
-import { useState } from 'react';
 import useEmployeeManagement from '../../models/employeeModel';
 import EmployeeForm from './EmployeeForm';
 
@@ -8,40 +7,28 @@ const positions = ["Giám đốc", "Nhân viên", "Quản lý"];
 const departments = ["Kỹ thuật", "Nhân sự", "Kinh doanh"];
 
 const EmployeeTable = () => {
-  const { employees, setVisible, setIsEdit, deleteEmployee, setSelectedEmployee, visible, isEdit } = useEmployeeManagement();
-  const [search, setSearch] = useState<string>('');
-  const [filterPosition, setFilterPosition] = useState<string | undefined>(undefined);
-  const [filterDepartment, setFilterDepartment] = useState<string | undefined>(undefined);
-  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
-  const filteredEmployees = employees.filter((employee) => {
-    const matchesSearch =
-      employee.id.toLowerCase().includes(search.toLowerCase()) ||
-      employee.name.toLowerCase().includes(search.toLowerCase());
-    const matchesPosition = filterPosition ? employee.position === filterPosition : true;
-    const matchesDepartment = filterDepartment ? employee.department === filterDepartment : true;
-    return matchesSearch && matchesPosition && matchesDepartment;
-  });
-  const clearFilters = () => {
-    setSearch('');
-    setFilterPosition(undefined);
-    setFilterDepartment(undefined);
-  };
-  const handleDeleteEmployee = (id: string) => {
-    setEmployeeToDelete(id);
-    setConfirmDeleteVisible(true);
-  };
-  const handleConfirmDelete = () => {
-    if (employeeToDelete) {
-      deleteEmployee(employeeToDelete);
-    }
-    setConfirmDeleteVisible(false);
-    setEmployeeToDelete(null); 
-  };
-  const handleCancelDelete = () => {
-    setConfirmDeleteVisible(false);
-    setEmployeeToDelete(null); 
-  };
+  const {
+    filteredEmployees,
+    setVisible,
+    setIsEdit,
+    deleteEmployee,
+    setSelectedEmployee,
+    visible,
+    isEdit,
+
+    search,
+    setSearch,
+    filterPosition,
+    setFilterPosition,
+    filterDepartment,
+    setFilterDepartment,
+    clearFilters,
+
+    handleDeleteEmployee,
+    handleConfirmDelete,
+    handleCancelDelete,
+    confirmDeleteVisible,
+  } = useEmployeeManagement();
 
   const columns = [
     { title: 'Mã NV', dataIndex: 'id', key: 'id' },
@@ -56,9 +43,9 @@ const EmployeeTable = () => {
         <div>
           <Button
             onClick={() => {
-              setVisible(true); 
-              setSelectedEmployee(record); 
-              setIsEdit(true);  
+              setVisible(true);
+              setSelectedEmployee(record);
+              setIsEdit(true);
             }}
           >
             Sửa
@@ -79,7 +66,7 @@ const EmployeeTable = () => {
           onClick={() => {
             setVisible(true);
             setIsEdit(false);
-            setSelectedEmployee(null); 
+            setSelectedEmployee(null);
           }}
         >
           Thêm Nhân Viên
@@ -98,6 +85,7 @@ const EmployeeTable = () => {
           value={filterPosition}
           onChange={setFilterPosition}
           style={{ width: 200 }}
+          allowClear
         >
           {positions.map((position) => (
             <Option key={position} value={position}>
@@ -110,6 +98,7 @@ const EmployeeTable = () => {
           value={filterDepartment}
           onChange={setFilterDepartment}
           style={{ width: 200 }}
+          allowClear
         >
           {departments.map((department) => (
             <Option key={department} value={department}>
@@ -117,20 +106,19 @@ const EmployeeTable = () => {
             </Option>
           ))}
         </Select>
-        <Button onClick={clearFilters} type="default" style={{ marginLeft: 10 }}>
+        <Button onClick={clearFilters} type="default">
           Xóa Bộ Lọc
         </Button>
       </Space>
 
       <Table dataSource={filteredEmployees} columns={columns} rowKey="id" />
 
-
       <Modal
         visible={visible}
         title={isEdit ? 'Sửa nhân viên' : 'Thêm nhân viên'}
         onCancel={() => {
           setVisible(false);
-          setSelectedEmployee(null); 
+          setSelectedEmployee(null);
         }}
         footer={null}
       >
