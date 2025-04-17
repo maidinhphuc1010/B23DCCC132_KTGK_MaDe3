@@ -1,20 +1,5 @@
 import { useState, useEffect } from 'react';
-
-export enum EmployeeStatus {
-  Trial = 'Thử việc',
-  ContractSigned = 'Đã ký hợp đồng',
-  Leave = 'Nghỉ phép',
-  Resigned = 'Đã thôi việc',
-}
-
-export interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-  salary: number;
-  status: EmployeeStatus;
-}
+import { Employee, EmployeeStatus } from '../services/Employee/typing'; 
 
 const useEmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
